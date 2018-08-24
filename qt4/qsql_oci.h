@@ -46,11 +46,11 @@
 #include <QtSql/qsqldriver.h>
 #include "qsqlcachedresult_p.h"
 
-#ifdef QT_PLUGIN
-#define Q_EXPORT_SQLDRIVER_OCI
-#else
+// #ifdef QT_PLUGIN
+// #define Q_EXPORT_SQLDRIVER_OCI
+// #else
 #define Q_EXPORT_SQLDRIVER_OCI Q_SQL_EXPORT
-#endif
+// #endif
 
 QT_BEGIN_HEADER
 

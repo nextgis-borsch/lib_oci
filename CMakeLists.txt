@@ -98,7 +98,7 @@ execute_process(
 )
 
 set(LIB_NAME ${PROJECT_NAME})
-add_library(${LIB_NAME} IMPORTED)
+add_library(${LIB_NAME} SHARED IMPORTED)
 target_include_directories(${LIB_NAME} INTERFACE ${CMAKE_BINARY_DIR}/include)
 
 set(LIB_FILENAME)

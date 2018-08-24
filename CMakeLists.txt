@@ -67,6 +67,7 @@ report_version(${PROJECT_NAME} ${VERSION})
 if(OSX_FRAMEWORK)
     set(FRAMEWORK_VERSION "${MAJOR_VERSION}")
     set(INSTALL_LIB_DIR "Library/Frameworks" CACHE INTERNAL "Installation directory for libraries" FORCE)
+    set(INSTALL_CMAKECONF_DIR CMake CACHE INTERNAL "Installation directory for cmake config files" FORCE)
 endif()
 
 file(GLOB LOCAL_SOURCES_ARCHIVES LIST_DIRECTORIES false "*.tar.gz")

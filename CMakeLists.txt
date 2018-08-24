@@ -108,8 +108,8 @@ set(LIB_FILENAME)
 if(WIN32)
     set(LIB_FILENAME oci.lib)
     set_target_properties(${LIB_NAME} PROPERTIES
-        IMPORTED_IMPLIB_RELEASE "${CMAKE_BINARY_DIR}/bin/oci.dll"
-        IMPORTED_LOCATION_RELEASE "${CMAKE_BINARY_DIR}/lib/${LIB_FILENAME}"
+        IMPORTED_IMPLIB_RELEASE "${CMAKE_BINARY_DIR}/lib/${LIB_FILENAME}"
+        IMPORTED_LOCATION_RELEASE "${CMAKE_BINARY_DIR}/bin/oci.dll"
     )
 elseif(APPLE)
     set(LIB_FILENAME libclntsh.dylib.${MAJOR_VERSION}.${SO_VERSION})

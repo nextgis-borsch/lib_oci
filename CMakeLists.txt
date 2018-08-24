@@ -65,6 +65,7 @@ set(SO_VERSION 1)
 report_version(${PROJECT_NAME} ${VERSION})
 
 if(OSX_FRAMEWORK)
+    set(CMAKE_MACOSX_RPATH ON)
     set(FRAMEWORK_VERSION "${MAJOR_VERSION}")
     set(INSTALL_LIB_DIR "Library/Frameworks" CACHE INTERNAL "Installation directory for libraries" FORCE)
     set(INSTALL_CMAKECONF_DIR CMake CACHE INTERNAL "Installation directory for cmake config files" FORCE)
@@ -99,19 +100,26 @@ execute_process(
 
 set(LIB_NAME ${PROJECT_NAME})
 add_library(${LIB_NAME} SHARED IMPORTED)
-target_include_directories(${LIB_NAME} INTERFACE ${CMAKE_BINARY_DIR}/include)
+set_property(TARGET ${LIB_NAME} PROPERTY
+    INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_BINARY_DIR}/include
+)
 
 set(LIB_FILENAME)
 if(WIN32)
     set(LIB_FILENAME oci.lib)
-    set_property(TARGET ${LIB_NAME} PROPERTY INTERFACE_LINK_LIBRARIES ${CMAKE_BINARY_DIR}/lib/${LIB_FILENAME})
-    set_property(TARGET ${LIB_NAME} PROPERTY IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/bin/oci.dll)
+    set_target_properties(${LIB_NAME} PROPERTIES
+        IMPORTED_IMPLIB_RELEASE "${CMAKE_BINARY_DIR}/bin/oci.dll"
+        IMPORTED_LOCATION_RELEASE "${CMAKE_BINARY_DIR}/lib/${LIB_FILENAME}"
+    )
 elseif(APPLE)
     set(LIB_FILENAME libclntsh.dylib.${MAJOR_VERSION}.${SO_VERSION})
-    set_property(TARGET ${LIB_NAME} PROPERTY INTERFACE_LINK_LIBRARIES ${CMAKE_BINARY_DIR}/lib/${LIB_FILENAME})
+    set_target_properties(${LIB_NAME} PROPERTIES
+        IMPORTED_LOCATION_RELEASE "${CMAKE_BINARY_DIR}/lib/${LIB_FILENAME}"
+        IMPORTED_SONAME_RELEASE "@rpath/${LIB_FILENAME}"
+    )
 else()
     set(LIB_FILENAME libclntsh.so.${MAJOR_VERSION}.${SO_VERSION})
-    set_property(TARGET ${LIB_NAME} PROPERTY INTERFACE_LINK_LIBRARIES ${CMAKE_BINARY_DIR}/lib/${LIB_FILENAME})
+    set_property(TARGET ${LIB_NAME} PROPERTY IMPORTED_LOCATION_RELEASE ${CMAKE_BINARY_DIR}/lib/${LIB_FILENAME})
 endif()
 
 set(HHEADERS
@@ -168,6 +176,10 @@ else()
         ${CMAKE_BINARY_DIR}/lib/libclntsh.so
         ${CMAKE_BINARY_DIR}/lib/libclntshcore.so.${MAJOR_VERSION}.${SO_VERSION}
     )
+endif()
+
+if(BUILD_QT4)
+    add_subdirectory(qt4)
 endif()
 
 set(PACKAGE_NAME ${PROJECT_NAME})

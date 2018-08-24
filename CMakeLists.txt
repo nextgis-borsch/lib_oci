@@ -79,7 +79,7 @@ set(DOWNLOAD_PATH_BASE "http://dev.nextgis.com/third-party/oci/current")
 if(NOT LOCAL_SOURCES_ARCHIVES)
     if(WIN32)
         if(CMAKE_CL_64)
-            set(URL ${DOWNLOAD_PATH_BASE}/win/x64_86/vc120/lib.tar.gz)
+            set(URL ${DOWNLOAD_PATH_BASE}/win/x86_64/vc120/lib.tar.gz)
         else()
             set(URL ${DOWNLOAD_PATH_BASE}/win/x86/vc120/lib.tar.gz)
         endif()
@@ -150,7 +150,12 @@ set(BIN_FILES)
 set(LIB_FILES)
 if(WIN32)
     set(LIB_FILES ${CMAKE_BINARY_DIR}/lib/oci.lib)
-    set(BIN_FILES ${CMAKE_BINARY_DIR}/bin/oci.dll)
+    set(BIN_FILES
+        ${CMAKE_BINARY_DIR}/bin/oci.dll
+        ${CMAKE_BINARY_DIR}/bin/msvcp120.dll
+        ${CMAKE_BINARY_DIR}/bin/msvcr120.dll
+        ${CMAKE_BINARY_DIR}/bin/vccorlib120.dll
+    )
 elseif(APPLE)
     set(LIB_FILES
         ${CMAKE_BINARY_DIR}/lib/libclntsh.dylib.${MAJOR_VERSION}.${SO_VERSION}

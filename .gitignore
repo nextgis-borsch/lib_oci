@@ -1,0 +1,10 @@
+# C extensions
+*.so
+
+build/
+lib/
+lib64/
+
+# Installer
+inst/
+*.tar.gz

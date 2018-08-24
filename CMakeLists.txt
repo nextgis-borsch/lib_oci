@@ -115,10 +115,35 @@ else()
 endif()
 
 set(HHEADERS
-    ${CMAKE_BINARY_DIR}/include/oci.h
+    ${CMAKE_BINARY_DIR}/include/ldap.h
+    ${CMAKE_BINARY_DIR}/include/nzerror.h
+    ${CMAKE_BINARY_DIR}/include/nzt.h
+    ${CMAKE_BINARY_DIR}/include/occiAQ.h
+    ${CMAKE_BINARY_DIR}/include/occiCommon.h
+    ${CMAKE_BINARY_DIR}/include/occiControl.h
+    ${CMAKE_BINARY_DIR}/include/occiData.h
+    ${CMAKE_BINARY_DIR}/include/occi.h
+    ${CMAKE_BINARY_DIR}/include/occiObjects.h
     ${CMAKE_BINARY_DIR}/include/oci1.h
-    ${CMAKE_BINARY_DIR}/include/oratypes.h
+    ${CMAKE_BINARY_DIR}/include/oci8dp.h
+    ${CMAKE_BINARY_DIR}/include/ociap.h
+    ${CMAKE_BINARY_DIR}/include/ociapr.h
+    ${CMAKE_BINARY_DIR}/include/ocidef.h
+    ${CMAKE_BINARY_DIR}/include/ocidem.h
     ${CMAKE_BINARY_DIR}/include/ocidfn.h
+    ${CMAKE_BINARY_DIR}/include/ociextp.h
+    ${CMAKE_BINARY_DIR}/include/oci.h
+    ${CMAKE_BINARY_DIR}/include/ocikpr.h
+    ${CMAKE_BINARY_DIR}/include/ocixmldb.h
+    ${CMAKE_BINARY_DIR}/include/ocixstream.h
+    ${CMAKE_BINARY_DIR}/include/odci.h
+    ${CMAKE_BINARY_DIR}/include/oratypes.h
+    ${CMAKE_BINARY_DIR}/include/orid.h
+    ${CMAKE_BINARY_DIR}/include/ori.h
+    ${CMAKE_BINARY_DIR}/include/orl.h
+    ${CMAKE_BINARY_DIR}/include/oro.h
+    ${CMAKE_BINARY_DIR}/include/ort.h
+    ${CMAKE_BINARY_DIR}/include/xa.h
 )
 
 set(BIN_FILES)

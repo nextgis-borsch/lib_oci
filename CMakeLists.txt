@@ -116,6 +116,7 @@ endif()
 
 set(HHEADERS
     ${CMAKE_BINARY_DIR}/include/oci.h
+    ${CMAKE_BINARY_DIR}/include/oci1.h
     ${CMAKE_BINARY_DIR}/include/oratypes.h
     ${CMAKE_BINARY_DIR}/include/ocidfn.h
 )

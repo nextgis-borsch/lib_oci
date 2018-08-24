@@ -98,7 +98,7 @@ execute_process(
 )
 
 set(LIB_NAME ${PROJECT_NAME})
-add_library(${LIB_NAME} INTERFACE IMPORTED)
+add_library(${LIB_NAME} IMPORTED)
 target_include_directories(${LIB_NAME} INTERFACE ${CMAKE_BINARY_DIR}/include)
 
 set(LIB_FILENAME)
@@ -182,11 +182,6 @@ if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
 endif()
 
 # Export package ===============================================================
-
-# Add path to includes to build-tree export
-target_include_directories(${LIB_NAME} INTERFACE
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
-)
 
 # Add all targets to the build-tree export set
 configure_file(cmake/PackageTargets.cmake.in

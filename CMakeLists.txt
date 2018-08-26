@@ -73,7 +73,7 @@ endif()
 
 file(GLOB LOCAL_SOURCES_ARCHIVES LIST_DIRECTORIES false "*.tar.gz")
 if(LOCAL_SOURCES_ARCHIVES)
-    message(STATUS "Local sources found: ${LOCAL_SOURCES_ARCHIVE}, version: ${VERSION}")
+    message(STATUS "Local sources found: ${LOCAL_SOURCES_ARCHIVES}, version: ${VERSION}")
 endif()
 
 set(DOWNLOAD_PATH_BASE "http://dev.nextgis.com/third-party/oci/current")
@@ -91,6 +91,8 @@ if(NOT LOCAL_SOURCES_ARCHIVES)
     endif()
     file(DOWNLOAD ${URL} "${CMAKE_CURRENT_BINARY_DIR}/lib.tar.gz")
     set(LOCAL_SOURCES_ARCHIVES ${CMAKE_BINARY_DIR}/lib.tar.gz)
+else()
+    file(COPY ${LOCAL_SOURCES_ARCHIVES} DESTINATION ${CMAKE_BINARY_DIR})
 endif()
 
 execute_process(

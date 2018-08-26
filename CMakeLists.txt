@@ -121,7 +121,11 @@ elseif(APPLE)
     )
 else()
     set(LIB_FILENAME libclntsh.so.${MAJOR_VERSION}.${SO_VERSION})
-    set_property(TARGET ${LIB_NAME} PROPERTY IMPORTED_LOCATION_RELEASE ${CMAKE_BINARY_DIR}/lib/${LIB_FILENAME})
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    	set_target_properties(${LIB_NAME} PROPERTIES IMPORTED_LOCATION_RELEASE ${CMAKE_BINARY_DIR}/x86_64/${LIB_FILENAME})
+    else()
+    	set_target_properties(${LIB_NAME} PROPERTIES IMPORTED_LOCATION_RELEASE ${CMAKE_BINARY_DIR}/x86/${LIB_FILENAME})
+    endif()
 endif()
 
 set(HHEADERS
@@ -173,11 +177,19 @@ elseif(APPLE)
         ${CMAKE_BINARY_DIR}/lib/libclntshcore.dylib.${MAJOR_VERSION}.${SO_VERSION}
     )
 else()
-    set(LIB_FILES
-        ${CMAKE_BINARY_DIR}/lib/libclntsh.so.${MAJOR_VERSION}.${SO_VERSION}
-        ${CMAKE_BINARY_DIR}/lib/libclntsh.so
-        ${CMAKE_BINARY_DIR}/lib/libclntshcore.so.${MAJOR_VERSION}.${SO_VERSION}
-    )
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(LIB_FILES
+            ${CMAKE_BINARY_DIR}/x86_64/libclntsh.so.${MAJOR_VERSION}.${SO_VERSION}
+            ${CMAKE_BINARY_DIR}/x86_64/libclntsh.so
+            ${CMAKE_BINARY_DIR}/x86_64/libclntshcore.so.${MAJOR_VERSION}.${SO_VERSION}
+        )
+    else()
+        set(LIB_FILES
+            ${CMAKE_BINARY_DIR}/x86/libclntsh.so.${MAJOR_VERSION}.${SO_VERSION}
+            ${CMAKE_BINARY_DIR}/x86/libclntsh.so
+            ${CMAKE_BINARY_DIR}/x86/libclntshcore.so.${MAJOR_VERSION}.${SO_VERSION}
+        )
+    endif()
 endif()
 
 if(BUILD_QT4)

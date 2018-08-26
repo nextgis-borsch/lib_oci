@@ -175,6 +175,8 @@ elseif(APPLE)
         ${CMAKE_BINARY_DIR}/lib/libclntsh.dylib.${MAJOR_VERSION}.${SO_VERSION}
         ${CMAKE_BINARY_DIR}/lib/libclntsh.dylib
         ${CMAKE_BINARY_DIR}/lib/libclntshcore.dylib.${MAJOR_VERSION}.${SO_VERSION}
+        ${CMAKE_BINARY_DIR}/lib/libnnz12.dylib
+        ${CMAKE_BINARY_DIR}/lib/libons.dylib
     )
 else()
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)

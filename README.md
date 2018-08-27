@@ -9,3 +9,7 @@ Network License Agreement for Oracle Instant Client software, licensees are
 authorized to use the version of Oracle Instant Client downloaded from this
 Oracle Technology Network webpage to provide third party training and
 instruction on the use of Oracle Instant Client.
+
+# Version
+
+12.2.0.1-9

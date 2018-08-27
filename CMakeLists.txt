@@ -100,7 +100,11 @@ execute_process(
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 
-set(LIB_NAME ${PROJECT_NAME})
+if(WIN32)
+    set(LIB_NAME ${PROJECT_NAME})
+else()
+    set(LIB_NAME clntsh)
+endif()
 add_library(${LIB_NAME} SHARED IMPORTED)
 set_property(TARGET ${LIB_NAME} PROPERTY
     INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_BINARY_DIR}/include

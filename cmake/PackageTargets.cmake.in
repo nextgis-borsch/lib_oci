@@ -62,17 +62,17 @@ set(LIB_DIR @INSTALL_LIB_DIR@)
 set_property(TARGET @LIB_NAME@ APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 
 if(WIN32)
-    set_target_properties(oci PROPERTIES
+    set_target_properties(@LIB_NAME@ PROPERTIES
         IMPORTED_IMPLIB_RELEASE "${_IMPORT_PREFIX}/${LIB_DIR}/${LIB_FILENAME}"
         IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/bin/oci.dll"
     )
 elseif(APPLE)
-    set_target_properties(oci PROPERTIES
+    set_target_properties(@LIB_NAME@ PROPERTIES
         IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/${LIB_DIR}/${LIB_FILENAME}"
         IMPORTED_SONAME_RELEASE "@rpath/${LIB_FILENAME}"
     )
 else()
-    set_target_properties(oci PROPERTIES
+    set_target_properties(@LIB_NAME@ PROPERTIES
         IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/${LIB_DIR}/${LIB_FILENAME}"
     )
 endif()

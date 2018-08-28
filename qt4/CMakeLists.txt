@@ -62,11 +62,13 @@ qt4_wrap_cpp(MOC_SPATIAL_SRCS4 ${QSQLOCISPATIAL_HEADERS})
 
 add_library(qsqlocispatial SHARED ${QSQLOCISPATIAL_SRC} ${QSQLOCISPATIAL_HEADERS} ${MOC_SPATIAL_SRCS4})
 
-target_link_libraries(qsqlocispatial PRIVATE Qt4::QtCore Qt4::QtSql ${LIB_NAME})
+set(LINK_LIBS Qt4::QtCore Qt4::QtSql ${LIB_NAME})
 
 if(MSVC)
-    target_link_libraries(qsqlocispatial wsock32)
+    set(LINK_LIBS ${LINK_LIBS} wsock32)
 endif(MSVC)
+
+target_link_libraries(qsqlocispatial PRIVATE ${LINK_LIBS})
 
 if(OSX_FRAMEWORK)
     set(INSTALL_MODULES_DIR Library/Plugins/Qt4/sqldrivers)

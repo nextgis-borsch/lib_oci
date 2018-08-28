@@ -12,4 +12,4 @@ instruction on the use of Oracle Instant Client.
 
 # Version
 
-12.2.0.1-9
+12.2.0.1-12

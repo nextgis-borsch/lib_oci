@@ -28,7 +28,7 @@
 include(FindAnyProject)
 find_anyproject(Qt4 REQUIRED COMPONENTS QtCore QtSql)
 
-add_definitions(-DQT_BUILD_SQL_LIB)
+add_definitions(-DQT_BUILD_SQL_LIB -DQT_PLUGIN -DQT_NO_DEBUG -DQT_SHARED)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

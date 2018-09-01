@@ -199,7 +199,7 @@ else()
             ${CMAKE_BINARY_DIR}/x86_64/libmql1.so
             ${CMAKE_BINARY_DIR}/x86_64/libnnz12.so
             ${CMAKE_BINARY_DIR}/x86_64/libons.so
-            ${CMAKE_BINARY_DIR}/lib/libociei.so
+            ${CMAKE_BINARY_DIR}/x86_64/libociei.so
         )
     else()
         set(LIB_FILES
@@ -208,7 +208,7 @@ else()
             ${CMAKE_BINARY_DIR}/x86/libclntshcore.so.${MAJOR_VERSION}.${SO_VERSION}
             ${CMAKE_BINARY_DIR}/x86/libnnz12.so
             ${CMAKE_BINARY_DIR}/x86/libons.so
-            ${CMAKE_BINARY_DIR}/lib/libociei.so
+            ${CMAKE_BINARY_DIR}/x86/libociei.so
         )
     endif()
 endif()

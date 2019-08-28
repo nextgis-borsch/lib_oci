@@ -3,8 +3,8 @@
 # Purpose:  CMake build scripts
 # Author:   Dmitry Baryshnikov, dmitry.baryshnikov@nextgis.com
 ################################################################################
-# Copyright (C) 2018, NextGIS <info@nextgis.com>
-# Copyright (C) 2018 Dmitry Baryshnikov
+# Copyright (C) 2018-2019, NextGIS <info@nextgis.com>
+# Copyright (C) 2018-2019 Dmitry Baryshnikov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -50,7 +50,6 @@ endif()
 include(GNUInstallDirs)
 
 set(INSTALL_BIN_DIR ${CMAKE_INSTALL_BINDIR} CACHE INTERNAL "Installation directory for executables" FORCE)
-# /usr/lib/oracle/<version>/client(64)/lib/ TODO: Do we need such conventions fon linux?
 set(INSTALL_LIB_DIR ${CMAKE_INSTALL_LIBDIR} CACHE INTERNAL "Installation directory for libraries" FORCE)
 set(INSTALL_INC_DIR ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME} CACHE INTERNAL "Installation directory for headers" FORCE)
 set(INSTALL_CMAKECONF_DIR ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/CMake CACHE INTERNAL "Installation directory for cmake config files" FORCE)
@@ -58,7 +57,7 @@ set(INSTALL_CMAKECONF_DIR ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/CMake CACHE I
 # setup package meta-data
 include(util)
 
-check_version(MAJOR_VERSION MINOR_VERSION REV_VERSION PATCH_VERSION)
+check_version(MAJOR_VERSION MINOR_VERSION REV_VERSION PATCH_VERSION DOWNLOAD_URL)
 set(VERSION ${MAJOR_VERSION}.${MINOR_VERSION}.${REV_VERSION}.${PATCH_VERSION})
 set(SO_VERSION 1)
 
@@ -71,28 +70,11 @@ if(OSX_FRAMEWORK)
     set(INSTALL_CMAKECONF_DIR CMake CACHE INTERNAL "Installation directory for cmake config files" FORCE)
 endif()
 
-file(GLOB LOCAL_SOURCES_ARCHIVES LIST_DIRECTORIES false "*.tar.gz")
-if(LOCAL_SOURCES_ARCHIVES)
-    message(STATUS "Local sources found: ${LOCAL_SOURCES_ARCHIVES}, version: ${VERSION}")
-endif()
-
-set(DOWNLOAD_PATH_BASE "http://dev.nextgis.com/third-party/oci/current")
-if(NOT LOCAL_SOURCES_ARCHIVES)
-    if(WIN32)
-        if(CMAKE_CL_64)
-            set(URL ${DOWNLOAD_PATH_BASE}/win/x86_64/vc120/lib.tar.gz)
-        else()
-            set(URL ${DOWNLOAD_PATH_BASE}/win/x86/vc120/lib.tar.gz)
-        endif()
-    elseif(APPLE)
-        set(URL ${DOWNLOAD_PATH_BASE}/mac/lib.tar.gz)
-    else() # Unix
-        set(URL ${DOWNLOAD_PATH_BASE}/lin/lib.tar.gz)
-    endif()
-    file(DOWNLOAD ${URL} "${CMAKE_CURRENT_BINARY_DIR}/lib.tar.gz")
-    set(LOCAL_SOURCES_ARCHIVES ${CMAKE_BINARY_DIR}/lib.tar.gz)
+set(LOCAL_PATH ${CMAKE_BINARY_DIR}/lib.tar.gz)
+if(EXISTS ${LOCAL_PATH})
+    message(STATUS "Local sources found: ${CMAKE_BINARY_DIR}/lib.tar.gz, version: ${VERSION}")
 else()
-    file(COPY ${LOCAL_SOURCES_ARCHIVES} DESTINATION ${CMAKE_BINARY_DIR})
+    file(DOWNLOAD ${DOWNLOAD_URL} "${CMAKE_CURRENT_BINARY_DIR}/lib.tar.gz")
 endif()
 
 execute_process(
@@ -108,9 +90,16 @@ endif()
 
 if(WIN32)
     set(LIB_NAME ${PROJECT_NAME})
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(SUB_DIR x86_64)
+    else()
+        set(SUB_DIR x86)
+    endif()
 else()
     set(LIB_NAME clntsh)
+    set(SUB_DIR x86_64)
 endif()
+
 add_library(${LIB_NAME} SHARED IMPORTED)
 set_property(TARGET ${LIB_NAME} PROPERTY
     INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_BINARY_DIR}/include
@@ -120,97 +109,33 @@ set(LIB_FILENAME)
 if(WIN32)
     set(LIB_FILENAME oci.lib)
     set_target_properties(${LIB_NAME} PROPERTIES
-        IMPORTED_IMPLIB_RELEASE "${CMAKE_BINARY_DIR}/lib/${LIB_FILENAME}"
-        IMPORTED_LOCATION_RELEASE "${CMAKE_BINARY_DIR}/bin/oci.dll"
+        IMPORTED_IMPLIB_RELEASE "${CMAKE_BINARY_DIR}/${SUB_DIR}/${LIB_FILENAME}"
+        IMPORTED_LOCATION_RELEASE "${CMAKE_BINARY_DIR}/${SUB_DIR}/oci.dll"
     )
 elseif(APPLE)
-    set(LIB_FILENAME libclntsh.dylib.${MAJOR_VERSION}.${SO_VERSION})
+    set(LIB_FILENAME libclntsh.dylib) # .${MAJOR_VERSION}.${SO_VERSION}
     set_target_properties(${LIB_NAME} PROPERTIES
-        IMPORTED_LOCATION_RELEASE "${CMAKE_BINARY_DIR}/lib/${LIB_FILENAME}"
+        IMPORTED_LOCATION_RELEASE "${CMAKE_BINARY_DIR}/${SUB_DIR}/${LIB_FILENAME}"
         IMPORTED_SONAME_RELEASE "@rpath/${LIB_FILENAME}"
     )
 else()
-    set(LIB_FILENAME libclntsh.so.${MAJOR_VERSION}.${SO_VERSION})
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    	set_target_properties(${LIB_NAME} PROPERTIES IMPORTED_LOCATION_RELEASE ${CMAKE_BINARY_DIR}/x86_64/${LIB_FILENAME})
-    else()
-    	set_target_properties(${LIB_NAME} PROPERTIES IMPORTED_LOCATION_RELEASE ${CMAKE_BINARY_DIR}/x86/${LIB_FILENAME})
-    endif()
+    set(LIB_FILENAME libclntsh.so) # .${MAJOR_VERSION}.${SO_VERSION}
+    set_target_properties(${LIB_NAME} PROPERTIES IMPORTED_LOCATION_RELEASE ${CMAKE_BINARY_DIR}/${SUB_DIR}/${LIB_FILENAME})
 endif()
 
-set(HHEADERS
-    ${CMAKE_BINARY_DIR}/include/ldap.h
-    ${CMAKE_BINARY_DIR}/include/nzerror.h
-    ${CMAKE_BINARY_DIR}/include/nzt.h
-    ${CMAKE_BINARY_DIR}/include/occiAQ.h
-    ${CMAKE_BINARY_DIR}/include/occiCommon.h
-    ${CMAKE_BINARY_DIR}/include/occiControl.h
-    ${CMAKE_BINARY_DIR}/include/occiData.h
-    ${CMAKE_BINARY_DIR}/include/occi.h
-    ${CMAKE_BINARY_DIR}/include/occiObjects.h
-    ${CMAKE_BINARY_DIR}/include/oci1.h
-    ${CMAKE_BINARY_DIR}/include/oci8dp.h
-    ${CMAKE_BINARY_DIR}/include/ociap.h
-    ${CMAKE_BINARY_DIR}/include/ociapr.h
-    ${CMAKE_BINARY_DIR}/include/ocidef.h
-    ${CMAKE_BINARY_DIR}/include/ocidem.h
-    ${CMAKE_BINARY_DIR}/include/ocidfn.h
-    ${CMAKE_BINARY_DIR}/include/ociextp.h
-    ${CMAKE_BINARY_DIR}/include/oci.h
-    ${CMAKE_BINARY_DIR}/include/ocikpr.h
-    ${CMAKE_BINARY_DIR}/include/ocixmldb.h
-    ${CMAKE_BINARY_DIR}/include/ocixstream.h
-    ${CMAKE_BINARY_DIR}/include/odci.h
-    ${CMAKE_BINARY_DIR}/include/oratypes.h
-    ${CMAKE_BINARY_DIR}/include/orid.h
-    ${CMAKE_BINARY_DIR}/include/ori.h
-    ${CMAKE_BINARY_DIR}/include/orl.h
-    ${CMAKE_BINARY_DIR}/include/oro.h
-    ${CMAKE_BINARY_DIR}/include/ort.h
-    ${CMAKE_BINARY_DIR}/include/xa.h
-)
+file(GLOB HHEADERS ${CMAKE_BINARY_DIR}/include/*.h)
 
 set(BIN_FILES)
 set(LIB_FILES)
 if(WIN32)
-    set(LIB_FILES ${CMAKE_BINARY_DIR}/lib/oci.lib)
+    set(LIB_FILES ${CMAKE_BINARY_DIR}/${SUB_DIR}/oci.lib)
     set(BIN_FILES
-        ${CMAKE_BINARY_DIR}/bin/oci.dll
-        ${CMAKE_BINARY_DIR}/bin/msvcp120.dll
-        ${CMAKE_BINARY_DIR}/bin/msvcr120.dll
-        ${CMAKE_BINARY_DIR}/bin/vccorlib120.dll
+        ${CMAKE_BINARY_DIR}/${SUB_DIR}/oci.dll
     )
 elseif(APPLE)
-    set(LIB_FILES
-        ${CMAKE_BINARY_DIR}/lib/libclntsh.dylib.${MAJOR_VERSION}.${SO_VERSION}
-        ${CMAKE_BINARY_DIR}/lib/libclntsh.dylib
-        ${CMAKE_BINARY_DIR}/lib/libclntshcore.dylib.${MAJOR_VERSION}.${SO_VERSION}
-        ${CMAKE_BINARY_DIR}/lib/libnnz12.dylib
-        ${CMAKE_BINARY_DIR}/lib/libons.dylib
-        ${CMAKE_BINARY_DIR}/lib/libociei.dylib
-    )
+    file(GLOB LIB_FILES ${CMAKE_BINARY_DIR}/${SUB_DIR}/*.dylib*)
 else()
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(LIB_FILES
-            ${CMAKE_BINARY_DIR}/x86_64/libclntsh.so.${MAJOR_VERSION}.${SO_VERSION}
-            ${CMAKE_BINARY_DIR}/x86_64/libclntsh.so
-            ${CMAKE_BINARY_DIR}/x86_64/libclntshcore.so.${MAJOR_VERSION}.${SO_VERSION}
-            ${CMAKE_BINARY_DIR}/x86_64/libipc1.so
-            ${CMAKE_BINARY_DIR}/x86_64/libmql1.so
-            ${CMAKE_BINARY_DIR}/x86_64/libnnz12.so
-            ${CMAKE_BINARY_DIR}/x86_64/libons.so
-            ${CMAKE_BINARY_DIR}/x86_64/libociei.so
-        )
-    else()
-        set(LIB_FILES
-            ${CMAKE_BINARY_DIR}/x86/libclntsh.so.${MAJOR_VERSION}.${SO_VERSION}
-            ${CMAKE_BINARY_DIR}/x86/libclntsh.so
-            ${CMAKE_BINARY_DIR}/x86/libclntshcore.so.${MAJOR_VERSION}.${SO_VERSION}
-            ${CMAKE_BINARY_DIR}/x86/libnnz12.so
-            ${CMAKE_BINARY_DIR}/x86/libons.so
-            ${CMAKE_BINARY_DIR}/x86/libociei.so
-        )
-    endif()
+    file(GLOB LIB_FILES ${CMAKE_BINARY_DIR}/${SUB_DIR}/*.so*)
 endif()
 
 if(BUILD_QT4)

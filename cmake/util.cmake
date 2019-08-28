@@ -3,8 +3,8 @@
 # Purpose:  CMake build scripts
 # Author:   Dmitry Baryshnikov, polimax@mail.ru
 ################################################################################
-# Copyright (C) 2015-2018, NextGIS <info@nextgis.com>
-# Copyright (C) 2012,2013,2014-2018 Dmitry Baryshnikov
+# Copyright (C) 2015-2019, NextGIS <info@nextgis.com>
+# Copyright (C) 2012-2019 Dmitry Baryshnikov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -26,14 +26,55 @@
 ################################################################################
 
 
-function(check_version major minor rev patch)
+function(check_version major minor rev patch download_url)
+    set(url https://rm.nextgis.com)
+    set(repo_id 2)
+    set(repo lib_oci)
 
-    # parse the version number from json_c_version.h and include in
-    # major, minor and rev parameters
-    set(_MAJOR_VERSION 12)
-    set(_MINOR_VERSION 2)
-    set(_MICRO_VERSION 0)
-    set(_PATCH_VERSION 1)
+    # https://rm.nextgis.com/api/repo/2/borsch?packet_name=lib_oci&release_tag=latest
+
+    file(DOWNLOAD 
+        ${url}/api/repo/${repo_id}/borsch?packet_name=${repo}&release_tag=latest
+        ${CMAKE_BINARY_DIR}/${repo}_latest.json
+        TLS_VERIFY OFF
+    )
+
+    file(READ ${CMAKE_BINARY_DIR}/${repo}_latest.json _JSON_CONTENTS)
+    include(JSONParser)
+
+    sbeParseJson(api_request _JSON_CONTENTS)
+    foreach(tag_id ${api_request.tags})
+        if("${api_request.tags_${tag_id}}" STREQUAL "latest")
+            continue()
+        endif()
+
+        string(REPLACE "." ";" VERSION_VAR ${api_request.tags_${tag_id}})
+        list(GET VERSION_VAR 0 _MAJOR_VERSION)
+        list(GET VERSION_VAR 1 _MINOR_VERSION)
+        list(GET VERSION_VAR 2 _MICRO_VERSION)
+        list(GET VERSION_VAR 3 _PATCH_VERSION)
+        break()
+    endforeach()
+
+    if(NOT _MAJOR_VERSION)
+        message(FATAL_ERROR "Failed parse version")
+    endif()
+
+    if(APPLE)
+        set(FILE_NAME apple_lib.tar.gz)
+    elseif(WIN32)
+        set(FILE_NAME win_lib.tar.gz)
+    elseif(UNIX)
+        set(FILE_NAME unix_lib.tar.gz)
+    endif()
+
+    foreach(asset_id ${api_request.files})
+        if(${api_request.files_${asset_id}.name} STREQUAL ${FILE_NAME})
+            color_message("Found binary package ${api_request.files_${asset_id}.name}")
+            set(${download_url} ${url}/api/asset/${api_request.files_${asset_id}.id}/download PARENT_SCOPE)
+            break()
+        endif()
+    endforeach()
 
     set(${major} ${_MAJOR_VERSION} PARENT_SCOPE)
     set(${minor} ${_MINOR_VERSION} PARENT_SCOPE)
@@ -46,7 +87,17 @@ function(check_version major minor rev patch)
     get_cpack_filename(${VERSION} PROJECT_CPACK_FILENAME)
     file(WRITE ${CMAKE_BINARY_DIR}/version.str "${VERSION}\n${VERSION_DATETIME}\n${PROJECT_CPACK_FILENAME}")
 
-endfunction(check_version)
+endfunction()
+
+function(color_message text)
+
+    string(ASCII 27 Esc)
+    set(BoldGreen   "${Esc}[1;32m")
+    set(ColourReset "${Esc}[m")
+
+    message(STATUS "${BoldGreen}${text}${ColourReset}")
+
+endfunction()
 
 function(report_version name ver)
 
@@ -58,14 +109,65 @@ function(report_version name ver)
 
 endfunction()
 
+# macro to find packages on the host OS
+macro( find_exthost_package )
+    if(CMAKE_CROSSCOMPILING)
+        set( CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER )
+        set( CMAKE_FIND_ROOT_PATH_MODE_LIBRARY NEVER )
+        set( CMAKE_FIND_ROOT_PATH_MODE_INCLUDE NEVER )
+
+        find_package( ${ARGN} )
+
+        set( CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY )
+        set( CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY )
+        set( CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY )
+    else()
+        find_package( ${ARGN} )
+    endif()
+endmacro()
+
+
+# macro to find programs on the host OS
+macro( find_exthost_program )
+    if(CMAKE_CROSSCOMPILING)
+        set( CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER )
+        set( CMAKE_FIND_ROOT_PATH_MODE_LIBRARY NEVER )
+        set( CMAKE_FIND_ROOT_PATH_MODE_INCLUDE NEVER )
+
+        find_program( ${ARGN} )
+
+        set( CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY )
+        set( CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY )
+        set( CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY )
+    else()
+        find_program( ${ARGN} )
+    endif()
+endmacro()
+
+
+function(get_prefix prefix IS_STATIC)
+  if(IS_STATIC)
+    set(STATIC_PREFIX "static-")
+      if(ANDROID)
+        set(STATIC_PREFIX "${STATIC_PREFIX}android-${ANDROID_ABI}-")
+      elseif(IOS)
+        set(STATIC_PREFIX "${STATIC_PREFIX}ios-${IOS_ARCH}-")
+      endif()
+    endif()
+  set(${prefix} ${STATIC_PREFIX} PARENT_SCOPE)
+endfunction()
+
 
 function(get_cpack_filename ver name)
     get_compiler_version(COMPILER)
-    if(BUILD_STATIC_LIBS)
-        set(STATIC_PREFIX "static-")
+    
+    if(NOT DEFINED BUILD_STATIC_LIBS)
+      set(BUILD_STATIC_LIBS OFF)
     endif()
 
-    set(${name} ${PROJECT_NAME}-${STATIC_PREFIX}${ver}-${COMPILER} PARENT_SCOPE)
+    get_prefix(STATIC_PREFIX ${BUILD_STATIC_LIBS})
+
+    set(${name} ${PROJECT_NAME}-${ver}-${STATIC_PREFIX}${COMPILER} PARENT_SCOPE)
 endfunction()
 
 function(get_compiler_version ver)
@@ -85,6 +187,8 @@ function(get_compiler_version ver)
             set(COMPILER "${COMPILER}-64bit")
         endif()
     endif()
+
+    set(COMPILER Clang-9.0)
 
     set(${ver} ${COMPILER} PARENT_SCOPE)
 endfunction()

@@ -138,8 +138,8 @@ else()
     file(GLOB LIB_FILES ${CMAKE_BINARY_DIR}/${SUB_DIR}/*.so*)
 endif()
 
-if(BUILD_QT4)
-    add_subdirectory(qt4)
+if(BUILD_QT5)
+    add_subdirectory(qt5)
 endif()
 
 set(PACKAGE_NAME ${PROJECT_NAME})

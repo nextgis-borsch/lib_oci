@@ -3,7 +3,7 @@
 # Purpose:  CMake build scripts
 # Author:   Dmitry Baryshnikov, dmitry.baryshnikov@nextgis.com
 ################################################################################
-# Copyright (C) 2018, NextGIS <info@nextgis.com>
+# Copyright (C) 2018-2020, NextGIS <info@nextgis.com>
 # Copyright (C) 2018 Dmitry Baryshnikov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -26,10 +26,15 @@
 ################################################################################
 
 include(FindAnyProject)
-find_anyproject(Qt4 REQUIRED COMPONENTS QtCore QtSql)
+find_anyproject(Qt5 REQUIRED COMPONENTS Core Sql)
+set(CMAKE_AUTOMOC ON)
 
-add_definitions(-DQT_BUILD_SQL_LIB -DQT_PLUGIN -DQT_NO_DEBUG -DQT_SHARED)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+add_definitions(-DQT_PLUGIN -DQT_NO_DEBUG -DQT_SHARED)
+
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${Qt5Sql_PRIVATE_INCLUDE_DIRS}
+)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -39,15 +44,12 @@ set(CSOURCES
 )
 
 set(HHEADERS
-    oci/qsql_oci.h
-    # qsqlcachedresult_p.h
+    oci/qsql_oci_p.h
 )
 
-qt4_wrap_cpp(MOC_SRCS4 ${HHEADERS})
+add_library(qsqloci SHARED ${CSOURCES} ${HHEADERS})
 
-add_library(qsqloci SHARED ${CSOURCES} ${HHEADERS} ${MOC_SRCS4})
-
-target_link_libraries(qsqloci PRIVATE Qt4::QtCore Qt4::QtSql ${LIB_NAME})
+target_link_libraries(qsqloci PRIVATE Qt5::Core Qt5::Sql ${LIB_NAME})
 
 set(QSQLOCISPATIAL_SRC
     ocispatial/qsql_ocispatial.cpp
@@ -58,11 +60,10 @@ set(QSQLOCISPATIAL_HEADERS
     ocispatial/qsql_ocispatial.h
     ocispatial/main.h
 )
-qt4_wrap_cpp(MOC_SPATIAL_SRCS4 ${QSQLOCISPATIAL_HEADERS})
 
-add_library(qsqlocispatial SHARED ${QSQLOCISPATIAL_SRC} ${QSQLOCISPATIAL_HEADERS} ${MOC_SPATIAL_SRCS4})
+add_library(qsqlocispatial SHARED ${QSQLOCISPATIAL_SRC} ${QSQLOCISPATIAL_HEADERS})
 
-set(LINK_LIBS Qt4::QtCore Qt4::QtSql ${LIB_NAME})
+set(LINK_LIBS Qt5::Core Qt5::Sql ${LIB_NAME})
 
 if(MSVC)
     set(LINK_LIBS ${LINK_LIBS} wsock32)
@@ -71,9 +72,9 @@ endif(MSVC)
 target_link_libraries(qsqlocispatial PRIVATE ${LINK_LIBS})
 
 if(OSX_FRAMEWORK)
-    set(INSTALL_MODULES_DIR Library/Plugins/Qt4/sqldrivers)
+    set(INSTALL_MODULES_DIR Library/Plugins/Qt5/sqldrivers)
 else()
-    set(INSTALL_MODULES_DIR ${INSTALL_LIB_DIR}/qt4/plugins/sqldrivers)
+    set(INSTALL_MODULES_DIR ${INSTALL_LIB_DIR}/qt5/plugins/sqldrivers)
 endif()
 
 if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL)

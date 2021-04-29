@@ -112,6 +112,7 @@ if(WIN32)
         IMPORTED_IMPLIB_RELEASE "${CMAKE_BINARY_DIR}/${SUB_DIR}/${LIB_FILENAME}"
         IMPORTED_LOCATION_RELEASE "${CMAKE_BINARY_DIR}/${SUB_DIR}/oci.dll"
     )
+    file(COPY ${CMAKE_BINARY_DIR}/${SUB_DIR}/${LIB_FILENAME} DESTINATION ${CMAKE_BINARY_DIR}/${INSTALL_LIB_DIR})
 elseif(APPLE)
     set(LIB_FILENAME libclntsh.dylib) # .${MAJOR_VERSION}.${SO_VERSION}
     set_target_properties(${LIB_NAME} PROPERTIES
@@ -161,8 +162,10 @@ endif()
 # Export package ===============================================================
 
 # Add all targets to the build-tree export set
-configure_file(cmake/PackageTargets.cmake.in
+configure_file(cmake/BuildTreePackageTargets.cmake.in
     ${PROJECT_BINARY_DIR}/${PACKAGE_UPPER_NAME}Targets.cmake ESCAPE_QUOTES @ONLY)
+configure_file(cmake/PackageTargets.cmake.in
+    ${PROJECT_BINARY_DIR}/CMakeInstallTargets/${PACKAGE_UPPER_NAME}Targets.cmake ESCAPE_QUOTES @ONLY)
 
 if(REGISTER_PACKAGE)
     # Export the package for use from the build-tree
@@ -178,7 +181,7 @@ if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL)
     # Install the <Package>Config.cmake
     install(FILES
       ${PROJECT_BINARY_DIR}/${PACKAGE_UPPER_NAME}Config.cmake
-      ${PROJECT_BINARY_DIR}/${PACKAGE_UPPER_NAME}Targets.cmake
+      ${PROJECT_BINARY_DIR}/CMakeInstallTargets/${PACKAGE_UPPER_NAME}Targets.cmake
       DESTINATION ${INSTALL_CMAKECONF_DIR} COMPONENT dev)
 endif()
 

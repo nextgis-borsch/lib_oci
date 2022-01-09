@@ -558,6 +558,10 @@ function(find_extproject name)
     set(${UPPER_NAME}_LIBRARIES ${${UPPER_NAME}_LIBRARIES} PARENT_SCOPE)
     set(${UPPER_NAME}_INCLUDE_DIRS ${${UPPER_NAME}_INCLUDE_DIRS} PARENT_SCOPE)
 
+    if (${UPPER_NAME} STREQUAL "QT5")
+        set(Qt5Sql_PRIVATE_INCLUDE_DIRS ${Qt5Sql_PRIVATE_INCLUDE_DIRS} PARENT_SCOPE)
+    endif()
+
     set_target_properties(${${UPPER_NAME}_LIBRARIES} PROPERTIES IMPORTED_GLOBAL TRUE)
 
     add_dependencies(${${UPPER_NAME}_LIBRARIES} ${name}_EP)

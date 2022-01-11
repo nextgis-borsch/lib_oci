@@ -76,6 +76,8 @@
 #include <qdebug.h>
 #include <cmath>
 
+#include <QtGlobal>
+
 #ifdef Q_OS_WIN
 #include <winsock.h>
 #else
